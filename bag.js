@@ -83,4 +83,61 @@ function bag01Solve(items, payload) {
     return maxValue;
 }
 
+function unlimitedBag(items, payload) {
+    function initRecord(things) {
+        const ret = [];
+        const itemsCount = things.length;
+        for (let i = 0; i < itemsCount; i ++) {
+            ret[i] = [];
+        }
+        return ret;
+    };
+
+    function whichItems(record, items, payload) {
+        let result = [];
+        let nextPayload = payload;
+        for (let i = items.length - 1; i >= 0; i --) {
+            if (i === 0) {
+                if (record[i][nextPayload] !== 0) {
+                    result.push(i);
+                }
+                break;
+            }
+            while(record[i][nextPayload] !== record[i -1][nextPayload]) {
+                result.push(i);
+                nextPayload -= items[i].w;
+            }
+        }
+        return result;
+    }
+
+    const record = initRecord(items);
+    for (let i = 0; i < items.length; i ++) {
+        for (let j = 0; j <= payload; j ++) {
+            // 装不下
+            if (j < items[i].w) {
+                if (i === 0) {
+                    record[i][j] = 0
+                } else {
+                    record[i][j] = record[i - 1][j];
+                }
+            } else {
+                // 选择是否装该物品
+                if (i === 0) {
+                    // 第一排直接装
+                    record[i][j] = items[i].v + record[i][j - items[i].w];
+                } else {
+                    record[i][j] = Math.max(record[i-1][j], items[i].v + record[i][j - items[i].w]);
+                }
+            }
+        }
+    }
+    console.log(record);
+    const maxValue = record[items.length - 1][payload];
+    console.log(`which items?: ${whichItems(record, items, payload)}`);
+
+    return maxValue;
+}
+
 console.log(`0-1 bag: ${bag01Solve(data, payload)}`);
+console.log(`unlimited bag: ${unlimitedBag(data, payload)}`);
